@@ -549,7 +549,7 @@ class Remote(LazyMixin, Iterable):
         # read the lines manually as it will use carriage returns between the messages
         # to override the previous one. This is why we read the bytes manually
         stdout, stderr = proc.communicate()
-        digest_process_messages(io.StringIO(stderr), progress)
+        digest_process_messages(io.BytesIO(stderr), progress)
 
         output = IterableList('name')
         for line in stdout.splitlines():
