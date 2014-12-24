@@ -33,6 +33,7 @@ from gitdb.util import join
 import re
 import os
 import sys
+import io
 
 __all__ = ('RemoteProgress', 'PushInfo', 'FetchInfo', 'Remote')
 
@@ -547,10 +548,11 @@ class Remote(LazyMixin, Iterable):
         # we hope stdout can hold all the data, it should ...
         # read the lines manually as it will use carriage returns between the messages
         # to override the previous one. This is why we read the bytes manually
-        digest_process_messages(proc.stderr, progress)
+        stdout, stderr = proc.communicate()
+        digest_process_messages(io.StringIO(stderr), progress)
 
         output = IterableList('name')
-        for line in proc.stdout.readlines():
+        for line in stdout.splitlines():
             try:
                 output.append(PushInfo._from_line(self, line))
             except ValueError:
@@ -559,7 +561,6 @@ class Remote(LazyMixin, Iterable):
             # END exception handling
         # END for each line
 
-        finalize_process(proc)
         return output
 
     def fetch(self, refspec=None, progress=None, **kwargs):
